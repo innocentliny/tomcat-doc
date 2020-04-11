@@ -1,5 +1,5 @@
 # TLS v1.3 in Tomcat.
-Options to enable TLS v1.3 in Tomcat v8.5+.
+Learning about TLS v1.3 in Tomcat.
 
 ## Option 1 - Upgrade Java version
 * Tomcat can support TLS v1.3 via JSSE when Java version >= 11
@@ -46,12 +46,38 @@ To simplify, root account is used.
    wget http://ftp.mirror.tw/pub/apache/tomcat/tomcat-8/v8.5.54/bin/apache-tomcat-8.5.54.tar.gz
    tar -zxvf apache-tomcat-8.5.54.tar.gz -C /opt/tomcat --strip-components=1
    ```
-1. Enable tomcat service:
+1. Open port in firewall:
+   ```shell script
+   firewall-cmd --zone=public --permanent --add-port=8080/tcp  --add-port=443/tcp
+   firewall-cmd --reload
+   ```
+1. [Install APR](https://blog.csdn.net/ClementAD/article/details/47320037):
+   ```shell script
+   yum install apr apr-util apr-devel -y
+   ls -l /usr/bin/apr-1-config
+   ```
+1. Install Tomcat native (search by [pkgs.org](https://pkgs.org/)):
+   ```shell script
+   yum install -y https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/t/tomcat-native-1.2.23-1.el8.x86_64.rpm
+   ```
+1. Update server.xml:
+   ```shell script
+   cd /opt/tomcat/conf
+   cp -pr server.xml server.xml.bak
+   ```
+   * add "TLSv1.3" to "protocols" attribute.
+   * add below to "ciphers" attribute
+     * TLS_AES_128_GCM_SHA256
+     * TLS_AES_256_GCM_SHA384
+   * set "TLS" to "sslProtocol" attribute.
+
+   See [server_sample.xml](server_sample.xml) for details.
+1. Start Tomcat service:
    ```shell script
    vi /etc/systemd/system/tomcat.service
    ```
    Add below:
-   ```properties
+   ```
    [Unit]
    Description=Apache Tomcat Web Application Container
    After=syslog.target network.target
@@ -77,38 +103,9 @@ To simplify, root account is used.
    ```
    ```shell script
    systemctl enable tomcat.service
-   ```
-1. Open port in firewall:
-   ```shell script
-   firewall-cmd --zone=public --permanent --add-port=8080/tcp  --add-port=443/tcp
-   firewall-cmd --reload
-   ```
-1. [Install APR](https://blog.csdn.net/ClementAD/article/details/47320037):
-   ```shell script
-   yum install apr apr-util apr-devel -y
-   ls -l /usr/bin/apr-1-config
-   ```
-1. Install Tomcat native (search by [pkgs.org](https://pkgs.org/)):
-   ```shell script
-   yum install -y https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/t/tomcat-native-1.2.23-1.el8.x86_64.rpm
-   ```
-1. Setup server.xml:
-   ```shell script
-   cd /opt/tomcat/conf
-   cp -pr server.xml server.xml.bak
-   ```
-   * add "TLSv1.3" to "protocols" attribute.
-   * add below to "ciphers" attribute
-     * TLS_AES_128_GCM_SHA256
-     * TLS_AES_256_GCM_SHA384
-   * set "TLS" to "sslProtocol" attribute.
-   
-   See [server_sample.xml](server_sample.xml) for details.
-1. Start Tomcat
-   ```shell script
    systemctl start tomcat.service
    ```
-1. Make sure TLS v1.3 is enabled
+1. Make sure TLS v1.3 is enabled:
    * You should see below messages in catalina.log:
      ```
      INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded APR based Apache Tomcat Native library [1.2.23] using APR version [1.6.3].
