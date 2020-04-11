@@ -5,7 +5,7 @@ Learning about TLS v1.3 in Tomcat.
 * Tomcat can support TLS v1.3 via JSSE when Java version >= 11
   * http://openjdk.java.net/jeps/332
   * https://bugs.openjdk.java.net/browse/JDK-8202625
-* It works on Windows and Unix-like platform.
+* It works on Windows and Unix-like platforms.
 
 ## Option 2 - Use latest OpenSSL
 * Tomcat can support TLS v1.3 via OpenSSL when OpenSSL version >= 1.1.1
@@ -22,7 +22,7 @@ Learning about TLS v1.3 in Tomcat.
         * Tomcat still loads built-in OpenSSL
           * Can't use yum to remove built-in OpenSSL completely, and no any updates for it via yum.
           * Can't completely replace built-in OpenSSL with manually newer OpenSSL installation.
-    * apr apr-util apr-devel packages
+    * apr, apr-util, and apr-devel packages
     * tomcat-native pakcage
 
 ## Step-by-step (CentOS-8 example)
