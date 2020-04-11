@@ -14,13 +14,6 @@ Options to enable TLS v1.3 in Tomcat v8.5+.
   * Required
     * Tomcat with APR/native library
       ![tomcat_win_version](img/tomcat_win_version.png)
-    * Tomcat server.xml
-      * add "TLSv1.3" to "protocols" attribute.
-      * add below to "ciphers" attribute
-        * TLS_AES_128_GCM_SHA256
-        * TLS_AES_256_GCM_SHA384
-      * set "TLS" to "sslProtocol" attribute.
-      * see [server_sample.xml](server_sample.xml) for details.
 * CentOS
   * Required
     * CentOS version >= 8
@@ -90,24 +83,43 @@ To simplify, root account is used.
    firewall-cmd --zone=public --permanent --add-port=8080/tcp  --add-port=443/tcp
    firewall-cmd --reload
    ```
-1. [Install APR]:
+1. [Install APR](https://blog.csdn.net/ClementAD/article/details/47320037):
    ```shell script
    yum install apr apr-util apr-devel -y
    ls -l /usr/bin/apr-1-config
    ```
-
-## Make sure TLS v1.3 is enabled
-  * You should see below messages in catalina.log:
-    ```
-    INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded APR based Apache Tomcat Native library [1.2.23] using APR version [1.6.3].
-    INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true].
-    INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
-    INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 1.1.1c FIPS  28 May 2019]
-    INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
-    INFO [main] org.apache.tomcat.util.net.NioSelectorPool.getSharedSelector Using a shared selector for servlet write/read
-    INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["https-openssl-nio2-443"]
-    ```
-  * Connect to your web site and check the connection details:
-    ![browser_connection_detail](img/browser_connection_detail.png)
+1. Install Tomcat native (search by [pkgs.org](https://pkgs.org/)):
+   ```shell script
+   yum install -y https://download-ib01.fedoraproject.org/pub/epel/8/Everything/x86_64/Packages/t/tomcat-native-1.2.23-1.el8.x86_64.rpm
+   ```
+1. Setup server.xml:
+   ```shell script
+   cd /opt/tomcat/conf
+   cp -pr server.xml server.xml.bak
+   ```
+   * add "TLSv1.3" to "protocols" attribute.
+   * add below to "ciphers" attribute
+     * TLS_AES_128_GCM_SHA256
+     * TLS_AES_256_GCM_SHA384
+   * set "TLS" to "sslProtocol" attribute.
+   
+   See [server_sample.xml](server_sample.xml) for details.
+1. Start Tomcat
+   ```shell script
+   systemctl start tomcat.service
+   ```
+1. Make sure TLS v1.3 is enabled
+   * You should see below messages in catalina.log:
+     ```
+     INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded APR based Apache Tomcat Native library [1.2.23] using APR version [1.6.3].
+     INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR capabilities: IPv6 [true], sendfile [true], accept filters [false], random [true].
+     INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent APR/OpenSSL configuration: useAprConnector [false], useOpenSSL [true]
+     INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 1.1.1c FIPS  28 May 2019]
+     INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+     INFO [main] org.apache.tomcat.util.net.NioSelectorPool.getSharedSelector Using a shared selector for servlet write/read
+     INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["https-openssl-nio2-443"]
+     ```
+   * Connect to your web site and check the connection details:
+     ![browser_connection_detail](img/browser_connection_detail.png)
 
 
